@@ -1,0 +1,128 @@
+{
+	"info": {
+		"_postman_id": "e4c3f02f-003b-40f0-a05d-b1f894125528",
+		"name": "Alojamiento",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "1299356"
+	},
+	"item": [
+		{
+			"name": "Crear Pais",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var paises = JSON.parse(pm.environment.get(\"paises\"));\r",
+							"var iActual = parseInt(pm.environment.get(\"indicePaisActual\"));\r",
+							"if(iActual >= paises.length){\r",
+							"    iActual = 0;\r",
+							"}\r",
+							"var pais = paises[iActual];\r",
+							"console.log(pais);\r",
+							"\r",
+							"pm.environment.set(\"nombrePaisActual\", pais.nombre);\r",
+							"pm.environment.set(\"codigoPaisActual\", pais.codigopais);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var iActual = parseInt(pm.environment.get(\"indicePaisActual\"));\r",
+							"var paises = JSON.parse(pm.environment.get(\"paises\"));\r",
+							"var pais = paises[iActual];\r",
+							"pm.test(\"Status code is \" + pais.respuesta, function () {\r",
+							"    pm.response.to.have.status(pais.respuesta);\r",
+							"});\r",
+							"if (pais.respuesta == 200) {\r",
+							"    pm.test(\"Response body is not empty\", function () {\r",
+							"        const responseBody = pm.response.text();\r",
+							"\r",
+							"        pm.expect(responseBody).to.not.be.empty;\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"La respuesta devuelve un GUID\", function () {\r",
+							"        const responseBody = pm.response.text();\r",
+							"        const guidRegex = /^\\\"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\\\"$/;\r",
+							"        pm.expect(responseBody).to.match(guidRegex);\r",
+							"        const paisId = JSON.parse(responseBody);\r",
+							"        var paisesId = JSON.parse(pm.environment.get(\"paisesId\"));\r",
+							"        paisesId.push(paisId);\r",
+							"        pm.environment.set(\"paisesId\", JSON.stringify(paisesId));\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"\r",
+							"iActual = iActual + 1;\r",
+							"if (iActual >= paises.length) {\r",
+							"    iActual = 0;\r",
+							"}\r",
+							"pm.environment.set(\"indicePaisActual\", iActual);\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"nombre\": \"{{nombrePaisActual}}\",\r\n    \"codigopais\": \"{{codigoPaisActual}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{URL_PRINCIPAL}}/Pais"
+			},
+			"response": []
+		},
+		{
+			"name": "CrearCiudad",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var paisesId = JSON.parse(pm.environment.get(\"paisesId\"));\r",
+							"var iActual = parseInt(pm.environment.get(\"indiceCiudadActual\"));\r",
+							"if(iActual >= paisesId.length){\r",
+							"    iActual = 0;\r",
+							"}\r",
+							"var ciudad = paisesId[iActual];\r",
+							"\r",
+							"pm.environment.set(\"nombreCiudadActual\", ciudad.nombre);\r",
+							"pm.environment.set(\"paisIdActual\", ciudad.codigopais);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"nombre\": \"{{nombreCiudadActual}}\",\r\n    \"paisid\": \"{{paisIdActual}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "{{URL_PRINCIPAL}}/Ciudad"
+			},
+			"response": []
+		}
+	]
+}
